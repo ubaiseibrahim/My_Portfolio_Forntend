@@ -1,0 +1,120 @@
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: transparent;
+    overflow: hidden;
+    padding: 180px 0 100px 0;
+    /* Increased top padding for fixed navbar */
+    text-align: center;
+}
+
+.z-index-10 {
+    z-index: 10;
+}
+
+/* Content Transitions */
+.hero-content-wrapper {
+    color: var(--secondary-color);
+}
+
+.animate-reveal-1 {
+    animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+.animate-reveal-2 {
+    animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+    opacity: 0;
+}
+
+.animate-reveal-3 {
+    animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+    opacity: 0;
+}
+
+.animate-reveal-4 {
+    animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+    opacity: 0;
+}
+
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.luxury-tag {
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 2rem;
+    display: block;
+}
+
+.hero-title {
+    font-size: clamp(2.2rem, 9vw, 5.8rem);
+    /* Slightly adjusted for better fit */
+    line-height: 1.1;
+    margin-bottom: 2.5rem;
+    font-weight: 900;
+    color: var(--secondary-color);
+    white-space: nowrap;
+    /* Force one row on desktop */
+    width: 100%;
+    overflow: visible;
+}
+
+.char-reveal {
+    display: inline-block;
+    opacity: 0;
+    transform: scale(0.5) translateZ(-100px);
+    filter: blur(10px);
+    animation: charEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--char-index) * 0.05s + 0.3s);
+}
+
+@keyframes charEntrance {
+    to {
+        opacity: 1;
+        transform: scale(1) translateZ(0);
+        filter: blur(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        white-space: normal;
+        /* Allow wrapping on mobile */
+    }
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--text-secondary);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.8;
+}
+
+@media (max-width: 991px) {
+    .hero-title {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 120px 0 60px 0;
+    }
+}
