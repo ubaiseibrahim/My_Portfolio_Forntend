@@ -22,18 +22,19 @@ const Sidebar = ({ onLogoutClick }) => {
                     <i className="fas fa-envelope"></i> Messages
                 </NavLink>
                 {/* Resume Link - Assuming path or handling download */}
-                <a href="#" className="nav-item" onClick={(e) => { e.preventDefault(); alert('Resume management coming soon!'); }}>
+                <button type="button" className="nav-item" onClick={(e) => { e.preventDefault(); alert('Resume management coming soon!'); }}>
                     <i className="fas fa-file-pdf"></i> Resume
-                </a>
+                </button>
             </nav>
             <div className="sidebar-footer">
-                <div
+                <button
+                    type="button"
                     className="nav-item logout-nav-item"
                     onClick={onLogoutClick}
                     style={{ cursor: 'pointer', marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)' }}
                 >
                     <i className="fa-solid fa-right-from-bracket"></i> Logout
-                </div>
+                </button>
             </div>
         </aside>
     );

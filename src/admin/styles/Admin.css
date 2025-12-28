@@ -143,6 +143,12 @@
     font-size: 0.9rem;
     border-left: 4px solid transparent;
     font-weight: 500;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
 }
 
 .nav-item:hover,
