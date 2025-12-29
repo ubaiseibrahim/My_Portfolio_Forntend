@@ -1,8 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../utils/function';
 import './../styles/Navbar.css';
 
 const Navbar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [resumeUrl, setResumeUrl] = useState(null);
+
+    useEffect(() => {
+        fetchResume();
+    }, []);
+
+    const fetchResume = async () => {
+        try {
+            const response = await fetch(`${BASE_URL}resume.php/get`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && (data.url || data.file_path)) {
+                    const url = data.url || data.file_path;
+                    setResumeUrl(url.startsWith('http') ? url : `${BASE_URL}${url}`);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to fetch resume');
+        }
+    };
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -13,12 +34,12 @@ const Navbar = () => {
     };
 
     const navLinks = [
-        { name: 'Home', href: '#home' },
-        { name: 'About', href: '#about' },
-        { name: 'Skills', href: '#skills' },
-        { name: 'History', href: '#experience' },
-        { name: 'Work', href: '#projects' },
-        { name: 'Contact', href: '#contact' },
+        { name: 'Home', href: 'home' },
+        { name: 'About', href: 'about' },
+        { name: 'Skills', href: 'skills' },
+        { name: 'History', href: 'experience' },
+        { name: 'Work', href: 'projects' },
+        { name: 'Contact', href: 'contact' },
     ];
 
     return (
@@ -50,7 +71,13 @@ const Navbar = () => {
                                 </li>
                             ))}
                             <li className="nav-item ms-lg-3">
-                                <a href="#resume" className="btn-premium"><span>Resume</span></a>
+                                {resumeUrl ? (
+                                    <a href={resumeUrl} className="btn-premium" download target="_blank" rel="noopener noreferrer">
+                                        <span>Resume</span>
+                                    </a>
+                                ) : (
+                                    <button className="btn-premium" disabled><span>No Resume</span></button>
+                                )}
                             </li>
                         </ul>
                     </div>
@@ -71,7 +98,13 @@ const Navbar = () => {
                         </li>
                     ))}
                     <li className="sidebar-item mt-4">
-                        <a href="#resume" className="btn-premium w-100" onClick={closeSidebar}><span>Resume</span></a>
+                        {resumeUrl ? (
+                            <a href={resumeUrl} className="btn-premium w-100" onClick={closeSidebar} download target="_blank" rel="noopener noreferrer">
+                                <span>Resume</span>
+                            </a>
+                        ) : (
+                            <button className="btn-premium w-100" disabled><span>No Resume</span></button>
+                        )}
                     </li>
                 </ul>
             </div>

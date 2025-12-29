@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { BASE_URL } from '../../utils/function';
 import '../styles/Admin.css';
 
+import ConfirmModal from '../components/ConfirmModal';
+
 const Projects = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editId, setEditId] = useState(null);
+    const [deleteModal, setDeleteModal] = useState({ show: false, id: null });
     const [formData, setFormData] = useState({
         project_name: '',
         display_order: 0,
@@ -15,8 +18,14 @@ const Projects = () => {
         technologies: '',
         status: 'Active'
     });
-    const [featuredImage, setFeaturedImage] = useState(null);
-    const [galleryImages, setGalleryImages] = useState([]);
+
+    // Unified Image Management State
+    const [featuredImage, setFeaturedImage] = useState(null); // File object for NEW upload
+    const [featuredPreview, setFeaturedPreview] = useState(null); // URL string for display
+    const [retainFeatured, setRetainFeatured] = useState(false); // Flag: keep existing server image?
+
+    const [galleryItems, setGalleryItems] = useState([]); // [{ type: 'server'|'local', url: string, file?: File, path?: string }]
+
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -43,9 +52,20 @@ const Projects = () => {
 
     const handleFileChange = (e) => {
         if (e.target.name === 'featured_image') {
-            setFeaturedImage(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file) {
+                setFeaturedImage(file);
+                setFeaturedPreview(URL.createObjectURL(file));
+                setRetainFeatured(false);
+            }
         } else {
-            setGalleryImages(Array.from(e.target.files));
+            const files = Array.from(e.target.files);
+            const newItems = files.map(file => ({
+                type: 'local',
+                url: URL.createObjectURL(file), // Create local preview URL
+                file: file
+            }));
+            setGalleryItems(prev => [...prev, ...newItems]);
         }
     };
 
@@ -59,9 +79,18 @@ const Projects = () => {
             technologies: '',
             status: 'Active'
         });
+
         setFeaturedImage(null);
-        setGalleryImages([]);
+        setFeaturedPreview(null);
+        setRetainFeatured(false);
+        setGalleryItems([]);
+
         setEditId(null);
+
+        // Reset file inputs
+        const explicitFileInputs = document.querySelectorAll('input[type="file"]');
+        explicitFileInputs.forEach(input => input.value = '');
+
         const modal = document.getElementById('projectModal');
         const modalInstance = window.bootstrap.Modal.getInstance(modal);
         if (modalInstance) modalInstance.hide();
@@ -73,8 +102,22 @@ const Projects = () => {
 
         const data = new FormData();
         Object.keys(formData).forEach(key => data.append(key, formData[key]));
-        if (featuredImage) data.append('featured_image', featuredImage);
-        galleryImages.forEach(file => data.append('gallery_images[]', file));
+
+        // Featured Image Logic
+        if (featuredImage) {
+            data.append('featured_image', featuredImage);
+        } else if (retainFeatured) {
+            data.append('retain_featured', '1');
+        }
+
+        // Gallery Images Logic
+        galleryItems.forEach(item => {
+            if (item.type === 'local') {
+                data.append('gallery_images[]', item.file);
+            } else if (item.type === 'server') {
+                data.append('existing_gallery[]', item.path);
+            }
+        });
 
         try {
             const url = editId ? `${BASE_URL}projects.php/put/${editId}` : `${BASE_URL}projects.php/post`;
@@ -105,21 +148,49 @@ const Projects = () => {
             status: project.status || 'Active'
         });
         setEditId(project.id);
+
+        // Populate Featured Image
+        if (project.featured_image) {
+            setFeaturedPreview(`${BASE_URL}${project.featured_image}`);
+            setRetainFeatured(true);
+            setFeaturedImage(null);
+        } else {
+            setFeaturedPreview(null);
+            setRetainFeatured(false);
+        }
+
+        // Populate Gallery Images
+        if (project.gallery_images && Array.isArray(project.gallery_images)) {
+            const items = project.gallery_images.map(path => ({
+                type: 'server',
+                path: path,
+                url: path.startsWith('http') ? path : `${BASE_URL}${path}`
+            }));
+            setGalleryItems(items);
+        } else {
+            setGalleryItems([]);
+        }
+
         const modal = new window.bootstrap.Modal(document.getElementById('projectModal'));
         modal.show();
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this project?')) {
-            try {
-                const response = await fetch(`${BASE_URL}projects.php/delete/${id}`, {
-                    method: 'POST'
-                });
-                if (!response.ok) throw new Error('Delete failed');
-                fetchProjects();
-            } catch (err) {
-                alert('Delete failed');
-            }
+    const handleDeleteClick = (id) => {
+        setDeleteModal({ show: true, id });
+    };
+
+    const confirmDelete = async () => {
+        const id = deleteModal.id;
+        try {
+            const response = await fetch(`${BASE_URL}projects.php/delete/${id}`, {
+                method: 'POST'
+            });
+            if (!response.ok) throw new Error('Delete failed');
+            fetchProjects();
+        } catch (err) {
+            console.error('Delete failed', err);
+        } finally {
+            setDeleteModal({ show: false, id: null });
         }
     };
 
@@ -155,7 +226,7 @@ const Projects = () => {
                                     <button className="btn-admin" onClick={() => handleEdit(project)} title="Edit">
                                         <i className="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <button className="btn-admin danger" onClick={() => handleDelete(project.id)} title="Delete">
+                                    <button className="btn-admin danger" onClick={() => handleDeleteClick(project.id)} title="Delete">
                                         <i className="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -164,6 +235,14 @@ const Projects = () => {
                     ))}
                 </div>
             )}
+
+            <ConfirmModal
+                show={deleteModal.show}
+                onClose={() => setDeleteModal({ show: false, id: null })}
+                onConfirm={confirmDelete}
+                title="Delete Project"
+                body="Are you sure you want to delete this project? This action cannot be undone."
+            />
 
             {/* Project Modal */}
             <div className="modal fade" id="projectModal" tabIndex="-1" aria-hidden="true">
@@ -203,10 +282,48 @@ const Projects = () => {
                                     <div className="col-md-6">
                                         <label className="form-label admin-form-label">Featured Image</label>
                                         <input type="file" name="featured_image" onChange={handleFileChange} className="form-control admin-form-input" accept="image/*" />
+                                        {featuredPreview && (
+                                            <div className="mt-2 position-relative d-inline-block">
+                                                <img src={featuredPreview} alt="Preview" className="img-thumbnail" style={{ height: '100px', objectFit: 'cover' }} />
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle p-0 d-flex justify-content-center align-items-center"
+                                                    style={{ width: '20px', height: '20px', transform: 'translate(30%, -30%)' }}
+                                                    onClick={() => {
+                                                        setFeaturedImage(null);
+                                                        setFeaturedPreview(null);
+                                                        setRetainFeatured(false);
+                                                        const input = document.querySelector('input[name="featured_image"]');
+                                                        if (input) input.value = '';
+                                                    }}
+                                                >
+                                                    <i className="fa-solid fa-times" style={{ fontSize: '12px' }}></i>
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="col-md-6">
                                         <label className="form-label admin-form-label">Gallery Images</label>
                                         <input type="file" name="gallery_images" onChange={handleFileChange} className="form-control admin-form-input" accept="image/*" multiple />
+                                        {galleryItems.length > 0 && (
+                                            <div className="mt-2 d-flex flex-wrap gap-3">
+                                                {galleryItems.map((item, idx) => (
+                                                    <div key={idx} className="position-relative">
+                                                        <img src={item.url} alt={`Gallery Preview ${idx}`} className="img-thumbnail" style={{ width: '60px', height: '60px', objectFit: 'cover' }} />
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle p-0 d-flex justify-content-center align-items-center"
+                                                            style={{ width: '18px', height: '18px', transform: 'translate(30%, -30%)' }}
+                                                            onClick={() => {
+                                                                setGalleryItems(prev => prev.filter((_, i) => i !== idx));
+                                                            }}
+                                                        >
+                                                            <i className="fa-solid fa-times" style={{ fontSize: '10px' }}></i>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

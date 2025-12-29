@@ -9,6 +9,7 @@ import Dashboard from './admin/pages/Dashboard';
 import Projects from './admin/pages/Projects';
 import Users from './admin/pages/Users';
 import Messages from './admin/pages/Messages';
+import Resume from './admin/pages/Resume';
 import './App.css';
 
 // Layout for public pages
@@ -40,6 +41,7 @@ function App() {
             <Route path="projects" element={<Projects />} />
             <Route path="users" element={<Users />} />
             <Route path="messages" element={<Messages />} />
+            <Route path="resume" element={<Resume />} />
           </Route>
 
           {/* Redirect any other /admin path to /admin */}

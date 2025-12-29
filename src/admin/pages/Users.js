@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BASE_URL } from '../../utils/function';
 import '../styles/Admin.css';
+import ConfirmModal from '../components/ConfirmModal';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
@@ -14,6 +15,7 @@ const Users = () => {
     const [profilePicture, setProfilePicture] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [editId, setEditId] = useState(null);
+    const [deleteModal, setDeleteModal] = useState({ show: false, id: null });
 
     useEffect(() => {
         fetchUsers();
@@ -77,7 +79,8 @@ const Users = () => {
             fetchUsers();
             resetForm();
         } catch (err) {
-            alert('Operation failed');
+            console.error('Operation failed', err);
+            // Optionally add an error toast here
         } finally {
             setSubmitting(false);
         }
@@ -95,17 +98,22 @@ const Users = () => {
         modal.show();
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            try {
-                const response = await fetch(`${BASE_URL}auth.php/delete/${id}`, {
-                    method: 'POST'
-                });
-                if (!response.ok) throw new Error('Delete failed');
-                fetchUsers();
-            } catch (err) {
-                alert('Delete failed');
-            }
+    const handleDeleteClick = (id) => {
+        setDeleteModal({ show: true, id });
+    };
+
+    const confirmDelete = async () => {
+        const id = deleteModal.id;
+        try {
+            const response = await fetch(`${BASE_URL}auth.php/delete/${id}`, {
+                method: 'POST'
+            });
+            if (!response.ok) throw new Error('Delete failed');
+            fetchUsers();
+        } catch (err) {
+            console.error('Delete failed', err);
+        } finally {
+            setDeleteModal({ show: false, id: null });
         }
     };
 
@@ -160,7 +168,7 @@ const Users = () => {
                                             <button className="btn-admin" onClick={() => handleEdit(user)}>
                                                 <i className="fa-solid fa-pen-to-square"></i>
                                             </button>
-                                            <button className="btn-admin danger" onClick={() => handleDelete(user.id)}>
+                                            <button className="btn-admin danger" onClick={() => handleDeleteClick(user.id)}>
                                                 <i className="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -171,6 +179,14 @@ const Users = () => {
                     </table>
                 </div>
             )}
+
+            <ConfirmModal
+                show={deleteModal.show}
+                onClose={() => setDeleteModal({ show: false, id: null })}
+                onConfirm={confirmDelete}
+                title="Delete User"
+                body="Are you sure you want to delete this user? This action cannot be undone."
+            />
 
             {/* User Modal */}
             <div className="modal fade" id="userModal" tabIndex="-1" aria-hidden="true">
