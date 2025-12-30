@@ -15,13 +15,15 @@ const Navbar = () => {
             const response = await fetch(`${BASE_URL}resume.php/get`);
             if (response.ok) {
                 const data = await response.json();
+                console.log("Resume Data:", data);
                 if (data && (data.url || data.file_path)) {
                     const url = data.url || data.file_path;
-                    setResumeUrl(url.startsWith('http') ? url : `${BASE_URL}${url}`);
+                    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+                    setResumeUrl(fullUrl);
                 }
             }
         } catch (err) {
-            console.error('Failed to fetch resume');
+            console.error('Failed to fetch resume', err);
         }
     };
 
@@ -34,12 +36,12 @@ const Navbar = () => {
     };
 
     const navLinks = [
-        { name: 'Home', href: 'home' },
-        { name: 'About', href: 'about' },
-        { name: 'Skills', href: 'skills' },
-        { name: 'History', href: 'experience' },
-        { name: 'Work', href: 'projects' },
-        { name: 'Contact', href: 'contact' },
+        { name: 'Home', href: '#home' },
+        { name: 'About', href: '#about' },
+        { name: 'Skills', href: '#skills' },
+        { name: 'History', href: '#experience' },
+        { name: 'Work', href: '#projects' },
+        { name: 'Contact', href: '#contact' },
     ];
 
     return (
