@@ -7,8 +7,6 @@ const VantaBirdsBackground = () => {
     const effectRef = useRef(null);
 
     useEffect(() => {
-        window.THREE = THREE;
-
         const initVanta = () => {
             if (!effectRef.current && vantaRef.current) {
                 try {
@@ -47,14 +45,22 @@ const VantaBirdsBackground = () => {
         const handleScroll = () => {
             if (vantaRef.current) {
                 const scrollY = window.scrollY;
-                vantaRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+                // Use requestAnimationFrame for smoother performance and to avoid blocking
+                requestAnimationFrame(() => {
+                    if (vantaRef.current) {
+                        vantaRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+                    }
+                });
             }
         };
 
         const handleResize = () => {
-            if (effectRef.current) {
-                effectRef.current.resize();
-            }
+            // Defer resize slightly to avoid layout thrashing loop
+            requestAnimationFrame(() => {
+                if (effectRef.current) {
+                    effectRef.current.resize();
+                }
+            });
         };
 
         window.addEventListener("scroll", handleScroll);
@@ -63,7 +69,11 @@ const VantaBirdsBackground = () => {
         return () => {
             clearTimeout(timer);
             if (effectRef.current) {
-                effectRef.current.destroy();
+                try {
+                    effectRef.current.destroy();
+                } catch (e) {
+                    console.warn("Failed to destroy Vanta effect:", e);
+                }
                 effectRef.current = null;
             }
             window.removeEventListener("scroll", handleScroll);

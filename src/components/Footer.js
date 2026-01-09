@@ -9,15 +9,15 @@ const Footer = () => {
             <div className="container footer-container">
                 <div className="footer-copyright">
                     <p className="mb-0 text-secondary small fw-bold" style={{ letterSpacing: '2px' }}>
-                        &copy; 2025 ELITE PORTFOLIO. ALL RIGHTS RESERVED.
+                        &copy; {new Date().getFullYear()} UBAISE IBRAHIM. ALL RIGHTS RESERVED.
                     </p>
                 </div>
 
                 <div className="social-links-corner">
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-icon">
+                    <a href="https://www.linkedin.com/in/ubaiseibrahim-89b594314/" target="_blank" rel="noopener noreferrer" className="social-icon">
                         <FontAwesomeIcon icon={faLinkedinIn} />
                     </a>
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon">
+                    <a href="https://www.instagram.com/ubaise_ibrahim/" target="_blank" rel="noopener noreferrer" className="social-icon">
                         <FontAwesomeIcon icon={faInstagram} />
                     </a>
                 </div>

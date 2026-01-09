@@ -4,23 +4,33 @@ import ReactDOM from 'react-dom';
 const ConfirmModal = ({ show, onClose, onConfirm, title, body, confirmText = 'Delete', cancelText = 'Cancel', isDanger = true }) => {
     const modalRef = useRef(null);
     const modalInstance = useRef(null);
+    const onCloseRef = useRef(onClose);
+
+    // Keep the latest onClose callback available for the event listener avoiding re-subscriptions
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
 
     useEffect(() => {
         const modalElement = modalRef.current;
         if (modalElement) {
             modalInstance.current = new window.bootstrap.Modal(modalElement);
-            modalElement.addEventListener('hidden.bs.modal', onClose);
-        }
 
-        return () => {
-            if (modalElement) {
-                modalElement.removeEventListener('hidden.bs.modal', onClose);
-            }
-            if (modalInstance.current) {
-                modalInstance.current.dispose();
-            }
-        };
-    }, [onClose]);
+            // Use a wrapper to call the current ref value
+            const handleHidden = () => {
+                if (onCloseRef.current) onCloseRef.current();
+            };
+
+            modalElement.addEventListener('hidden.bs.modal', handleHidden);
+
+            return () => {
+                modalElement.removeEventListener('hidden.bs.modal', handleHidden);
+                if (modalInstance.current) {
+                    modalInstance.current.dispose();
+                }
+            };
+        }
+    }, []); // Empty dependency array: only init once on mount
 
     useEffect(() => {
         if (modalInstance.current) {

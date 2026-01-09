@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../utils/function';
-import VantaBirdsBackground from '../../components/VantaBirdsBackground';
 import '../styles/Admin.css';
 
 const Login = () => {
@@ -48,7 +47,7 @@ const Login = () => {
 
     return (
         <div className="admin-container login-page">
-            <VantaBirdsBackground />
+            <div className="animated-bg"></div>
             <div className="login-card">
                 <div className="login-header">
                     <h2>Admin Portal</h2>

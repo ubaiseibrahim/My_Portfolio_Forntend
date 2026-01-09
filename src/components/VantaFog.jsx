@@ -35,7 +35,11 @@ const VantaFog = () => {
         return () => {
             clearTimeout(timer);
             if (effectRef.current) {
-                effectRef.current.destroy();
+                try {
+                    effectRef.current.destroy();
+                } catch (e) {
+                    console.warn("Failed to destroy Vanta Fog effect:", e);
+                }
                 effectRef.current = null;
             }
         };
