@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import useScrollReveal from '../hooks/useScrollReveal';
+import { motion } from 'framer-motion';
 import { BASE_URL } from '../utils/function';
 import './../styles/Contact.css';
 
 const Contact = () => {
-    const [sectionRef, isVisible] = useScrollReveal();
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [status, setStatus] = useState({ type: '', message: '' });
     const [loading, setLoading] = useState(false);
@@ -22,91 +21,129 @@ const Contact = () => {
         try {
             const response = await fetch(`${BASE_URL}contact.php/post`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to send message');
-            }
-
-            setStatus({ type: 'success', message: 'Message sent successfully! I will get back to you soon.' });
+            if (!response.ok) throw new Error(data.message || 'Failed to send message');
+            setStatus({ type: 'success', message: '✓ Message broadcasted successfully. I will reach out shortly.' });
             setFormData({ name: '', email: '', message: '' });
         } catch (error) {
-            setStatus({ type: 'error', message: error.message || 'Something went wrong. Please try again.' });
+            setStatus({ type: 'error', message: '⚠ Broadcasting failed: ' + (error.message || 'Check your signal.') });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <section
-            id="contact"
-            ref={sectionRef}
-            className={`contact-section ${isVisible ? 'reveal-active' : ''}`}
-        >
+        <section id="contact" className="contact-unique-section">
+            <div className="bg-text-watermark">CONTACT</div>
+            
             <div className="container">
                 <div className="row justify-content-center">
-                    <div className="col-lg-8">
-                        <div className="contact-card-custom shadow-sm text-center animate-reveal-1">
-                            <h2 className="display-6 fw-bold mb-3">Let's <span className="gradient-text">Collaborate</span></h2>
-                            <p className="text-secondary mb-5">Ready to start your next big project? Drop a message below!</p>
+                    <div className="col-xl-9">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            className="unique-contact-wrapper"
+                        >
+                            {/* ── UNIQUE HEADER ── */}
+                            <div className="unique-header-area">
+                                <motion.div 
+                                    initial={{ x: -100, opacity: 0 }}
+                                    whileInView={{ x: 0, opacity: 1 }}
+                                    transition={{ duration: 0.8 }}
+                                >
+                                    <span className="unique-subtitle">Available for projects</span>
+                                    <h2 className="unique-title">Let's build your <br/> next <span>Masterpiece</span>.</h2>
+                                </motion.div>
+                            </div>
 
-                            <form className="text-start animate-reveal-2" onSubmit={handleSubmit}>
+                            {/* ── MODERN MINIMALIST PODS ── */}
+                            <form onSubmit={handleSubmit} className="modern-pod-form">
                                 {status.message && (
-                                    <div className={`alert ${status.type === 'success' ? 'alert-success' : 'alert-danger'} mb-4`}>
-                                        {status.message}
-                                    </div>
-                                )}
-                                <div className="row g-3">
-                                    <div className="col-md-6 text-start">
-                                        <label className="form-label small fw-bold">Your Name</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            className="form-control input-custom"
-                                            placeholder="John Doe"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-6 text-start">
-                                        <label className="form-label small fw-bold">Email Address</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            className="form-control input-custom"
-                                            placeholder="john@example.com"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-12 text-start">
-                                        <label className="form-label small fw-bold">Your Message</label>
-                                        <textarea
-                                            name="message"
-                                            value={formData.message}
-                                            onChange={handleChange}
-                                            className="form-control input-custom"
-                                            placeholder="How can I help you?"
-                                            rows="5"
-                                            required
-                                        ></textarea>
-                                    </div>
-                                    <div className="col-12 mt-4 text-center">
-                                        <button type="submit" className="btn-premium w-100 py-3 mt-2 shadow-lg" disabled={loading}>
-                                            <span>{loading ? 'Sending...' : 'Send Message'}</span>
+                                    <motion.div 
+                                        initial={{ opacity: 0, scale: 0.9, y: -20 }} 
+                                        animate={{ opacity: 1, scale: 1, y: 0 }} 
+                                        className={`holographic-feedback ${status.type}`}
+                                    >
+                                        <div className="feedback-icon">
+                                            {status.type === 'success' ? '✓' : '⚠'}
+                                        </div>
+                                        <div className="feedback-content">
+                                            {status.message}
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            className="feedback-close-btn"
+                                            onClick={() => setStatus({ type: '', message: '' })}
+                                        >
+                                            <i className="fa-solid fa-xmark"></i>
                                         </button>
-                                    </div>
+                                    </motion.div>
+                                )}
+
+                                <div className="row g-4">
+                                    {[
+                                        { name: 'name', label: 'Full Name', type: 'text', col: 'col-md-6' },
+                                        { name: 'email', label: 'Email Address', type: 'email', col: 'col-md-6' },
+                                        { name: 'message', label: 'Your Project Vision', type: 'textarea', col: 'col-12' }
+                                    ].map((field, i) => (
+                                        <div key={field.name} className={field.col}>
+                                            <motion.div 
+                                                className={`contact-pod ${field.type === 'textarea' ? 'message-pod' : ''}`}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{ opacity: 1, y: 0 }}
+                                                viewport={{ once: true }}
+                                                transition={{ delay: 0.2 + i * 0.1, duration: 0.5 }}
+                                                whileHover={{ y: -5 }}
+                                            >
+                                                {field.type === 'textarea' ? (
+                                                    <textarea
+                                                        name={field.name}
+                                                        value={formData[field.name]}
+                                                        onChange={handleChange}
+                                                        placeholder=" "
+                                                        rows="5"
+                                                        required
+                                                    ></textarea>
+                                                ) : (
+                                                    <input
+                                                        type={field.type}
+                                                        name={field.name}
+                                                        value={formData[field.name]}
+                                                        onChange={handleChange}
+                                                        placeholder=" "
+                                                        required
+                                                    />
+                                                )}
+                                                <label>{field.label}</label>
+                                                <div className="pod-accent"></div>
+                                            </motion.div>
+                                        </div>
+                                    ))}
                                 </div>
+
+                                <motion.div 
+                                    className="form-footer-unique"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    transition={{ delay: 0.6 }}
+                                >
+                                    <button 
+                                        type="submit" 
+                                        className="unique-send-btn" 
+                                        disabled={loading}
+                                    >
+                                        <span>{loading ? 'SENDING...' : 'INITIATE CONTACT'}</span>
+                                        <div className="btn-icon">
+                                            <i className="fa-solid fa-arrow-right"></i>
+                                        </div>
+                                    </button>
+                                </motion.div>
                             </form>
-                        </div>
+
+                        </motion.div>
                     </div>
                 </div>
             </div>

@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { BASE_URL } from '../utils/function';
 import './../styles/Navbar.css';
 
 const Navbar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [resumeUrl, setResumeUrl] = useState(null);
+    const [scrolled, setScrolled] = useState(false);
+    const [scrollProgress, setScrollProgress] = useState(0);
+    const [activeSection, setActiveSection] = useState('home');
 
     useEffect(() => {
         fetchResume();
+
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            setScrolled(scrollY > 50);
+
+            // Progress bar
+            const total = document.documentElement.scrollHeight - window.innerHeight;
+            setScrollProgress(total > 0 ? (scrollY / total) * 100 : 0);
+
+            // Active section detection
+            const sections = ['home', 'about', 'skills', 'experience', 'projects', 'contact'];
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const el = document.getElementById(sections[i]);
+                if (el && scrollY >= el.offsetTop - 150) {
+                    setActiveSection(sections[i]);
+                    break;
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const fetchResume = async () => {
@@ -15,7 +41,6 @@ const Navbar = () => {
             const response = await fetch(`${BASE_URL}resume.php/get`);
             if (response.ok) {
                 const data = await response.json();
-                console.log("Resume Data:", data);
                 if (data && (data.url || data.file_path)) {
                     const url = data.url || data.file_path;
                     const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
@@ -27,88 +52,128 @@ const Navbar = () => {
         }
     };
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
-
-    const closeSidebar = () => {
-        setIsSidebarOpen(false);
-    };
+    const toggleSidebar = () => setIsSidebarOpen(p => !p);
+    const closeSidebar = () => setIsSidebarOpen(false);
 
     const navLinks = [
-        { name: 'Home', href: '#home' },
-        { name: 'About', href: '#about' },
-        { name: 'Skills', href: '#skills' },
-        { name: 'History', href: '#experience' },
-        { name: 'Work', href: '#projects' },
-        { name: 'Contact', href: '#contact' },
+        { name: 'Home', icon: 'fa-solid fa-house', href: '#home', id: 'home' },
+        { name: 'About', icon: 'fa-regular fa-user', href: '#about', id: 'about' },
+        { name: 'Skills', icon: 'fa-solid fa-bolt', href: '#skills', id: 'skills' },
+        { name: 'History', icon: 'fa-solid fa-clock-rotate-left', href: '#experience', id: 'experience' },
+        { name: 'Work', icon: 'fa-solid fa-layer-group', href: '#projects', id: 'projects' },
+        { name: 'Contact', icon: 'fa-regular fa-paper-plane', href: '#contact', id: 'contact' },
     ];
 
     return (
         <>
-            <nav className="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
-                <div className="container-fluid px-lg-5">
-                    <a className="navbar-brand navbar-brand-custom" href="/">UBAISE IBRAHIM <span className="text-primary">.</span></a>
+            {/* Scroll Progress Bar at very top */}
+            <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
 
-                    {/* Toggle Button for Mobile */}
-                    <button
-                        className={`navbar-toggler border-0 ${isSidebarOpen ? 'active' : ''}`}
-                        type="button"
-                        onClick={toggleSidebar}
-                        aria-label="Toggle navigation"
-                    >
-                        <div className="hamburger-icon">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </button>
+            <motion.nav 
+                className={`navbar-floating ${scrolled ? 'nav-scrolled' : ''}`}
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+            >
+                <div className="nav-floating-container">
+                    
+                    {/* Brand */}
+                    <a className="nav-brand-modern" href="/">
+                        <div className="brand-icon">U</div>
+                        <span className="brand-text" style={{ color: 'var(--secondary-color)' }}>UBAISE IBRAHIM</span>
+                    </a>
 
-                    {/* Desktop Navigation */}
-                    <div className="collapse navbar-collapse" id="navbarNav">
-                        <ul className="navbar-nav ms-auto align-items-center">
-                            {navLinks.map((link) => (
-                                <li key={link.name} className="nav-item">
-                                    <a className="nav-link nav-link-custom mx-lg-1" href={link.href}>{link.name}</a>
-                                </li>
-                            ))}
-                            <li className="nav-item ms-lg-3">
-                                {resumeUrl ? (
-                                    <a href={resumeUrl} className="btn-premium" download target="_blank" rel="noopener noreferrer">
-                                        <span>Resume</span>
-                                    </a>
-                                ) : (
-                                    <button className="btn-premium" disabled><span>No Resume</span></button>
-                                )}
-                            </li>
+                    {/* Desktop Links with Framer Motion Active Pill */}
+                    <div className="nav-desktop">
+                        <ul className="nav-links-wrapper">
+                            {navLinks.map((link) => {
+                                const isActive = activeSection === link.id;
+                                return (
+                                    <li key={link.name} className="nav-item-modern">
+                                        <a href={link.href} className={`nav-link-modern ${isActive ? 'active' : ''}`}>
+                                            <i className={`${link.icon} nav-link-icon`}></i>
+                                            <span className="nav-link-label">{link.name}</span>
+                                            
+                                            {/* Dynamic Active Indicator */}
+                                            {isActive && (
+                                                <motion.div 
+                                                    layoutId="nav-pill"
+                                                    className="nav-active-pill"
+                                                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                                />
+                                            )}
+                                        </a>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
-                </div>
-            </nav>
 
-            {/* Custom Sidebar for Mobile */}
-            <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={closeSidebar}></div>
-            <div className={`custom-sidebar ${isSidebarOpen ? 'active' : ''}`}>
-                <div className="sidebar-header">
-                    <a className="navbar-brand navbar-brand-custom" href="/" onClick={closeSidebar}>UBAISE IBRAHIM <span className="text-primary">.</span></a>
-                    <button className="btn-close-sidebar" onClick={closeSidebar}>&times;</button>
+                    {/* Right Side CTA & Mobile Toggle */}
+                    <div className="nav-actions">
+                        <motion.a 
+                            href={resumeUrl || '#'} 
+                            className="btn-premium d-none d-lg-flex"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            style={{ padding: '8px 20px', fontSize: '0.8rem', borderRadius: '100px' }}
+                            download target="_blank" rel="noopener noreferrer"
+                        >
+                            <span>Resume <i className="fa-solid fa-download ms-2"></i></span>
+                        </motion.a>
+
+                        <button
+                            className={`mobile-toggle-btn ${isSidebarOpen ? 'active' : ''} d-lg-none`}
+                            onClick={toggleSidebar}
+                            aria-label="Toggle navigation"
+                        >
+                            <div className="hamburger-modern">
+                                <span className="m-line line-1" style={{ background: 'var(--secondary-color)' }}></span>
+                                <span className="m-line line-2" style={{ background: 'var(--secondary-color)' }}></span>
+                                <span className="m-line line-3" style={{ background: 'var(--secondary-color)' }}></span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
-                <ul className="sidebar-nav">
-                    {navLinks.map((link) => (
-                        <li key={link.name} className="sidebar-item">
-                            <a className="sidebar-link" href={link.href} onClick={closeSidebar}>{link.name}</a>
-                        </li>
+            </motion.nav>
+
+            {/* Sidebar Overlay */}
+            <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={closeSidebar} />
+
+            {/* Mobile Sidebar */}
+            <div className={`custom-sidebar-modern ${isSidebarOpen ? 'active' : ''}`}>
+                <div className="sidebar-header-modern">
+                    <a className="nav-brand-modern" href="/" onClick={closeSidebar}>
+                        <div className="brand-icon">U</div>
+                        <span className="brand-text" style={{ color: 'var(--secondary-color)' }}>UBAISE IBRAHIM</span>
+                    </a>
+                    <button className="btn-close-modern" onClick={closeSidebar}>
+                        <i className="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div className="sidebar-nav-modern">
+                    {navLinks.map((link, i) => (
+                        <motion.a 
+                            key={link.name}
+                            href={link.href} 
+                            className={`sidebar-link-modern ${activeSection === link.id ? 'active' : ''}`}
+                            onClick={closeSidebar}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: isSidebarOpen ? 1 : 0, x: isSidebarOpen ? 0 : -20 }}
+                            transition={{ delay: i * 0.05 }}
+                        >
+                            <i className={`${link.icon} sidebar-icon`}></i>
+                            <span>{link.name}</span>
+                        </motion.a>
                     ))}
-                    <li className="sidebar-item mt-4">
-                        {resumeUrl ? (
-                            <a href={resumeUrl} className="btn-premium w-100" onClick={closeSidebar} download target="_blank" rel="noopener noreferrer">
-                                <span>Resume</span>
-                            </a>
-                        ) : (
-                            <button className="btn-premium w-100" disabled><span>No Resume</span></button>
-                        )}
-                    </li>
-                </ul>
+                </div>
+
+                <div className="sidebar-footer-modern">
+                    <a href={resumeUrl || '#'} className="btn-premium w-100" onClick={closeSidebar} download target="_blank" rel="noopener noreferrer">
+                        <i className="fa-solid fa-file-pdf pe-2"></i> Download Resume
+                    </a>
+                </div>
             </div>
         </>
     );

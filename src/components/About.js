@@ -1,44 +1,208 @@
-import React from 'react';
-import useScrollReveal from '../hooks/useScrollReveal';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './../styles/About.css';
 
 const About = () => {
-    const [sectionRef, isVisible] = useScrollReveal();
+    const [isScanning, setIsScanning] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
+    const scanTimerRef = useRef(null);
+
+    const handleMouseEnter = () => {
+        if (isVerified) return;
+        setIsScanning(true);
+        
+        scanTimerRef.current = setTimeout(() => {
+            setIsScanning(false);
+            setIsVerified(true);
+        }, 2200);
+    };
+
+    const handleMouseLeave = () => {
+        if (isVerified) return;
+        if (scanTimerRef.current) {
+            clearTimeout(scanTimerRef.current);
+        }
+        setIsScanning(false);
+    };
 
     return (
-        <section
-            id="about"
-            ref={sectionRef}
-            className={`about-section py-5 ${isVisible ? 'reveal-active' : ''}`}
-        >
-            <div className="container">
-                <div className="row justify-content-center">
-                    <div className="col-lg-10">
-                        <div className="about-glass-card glass-card p-5 text-center animate-reveal-1">
-                            <h6 className="luxury-tag mb-4 animate-reveal-2">About Me</h6>
-                            <h2 className="display-5 fw-bold mb-5 animate-reveal-3">Building the <span className="gradient-text">Future</span></h2>
-                            <div className="about-bio text-secondary text-start mx-auto animate-reveal-4" style={{ maxWidth: '850px', fontSize: '1.05rem', lineHeight: '1.8' }}>
-                                <p className="mb-4">
-                                    I am <strong>Ubaise Ibrahim</strong>, a passionate and dedicated Software Developer with experience in building modern, scalable, and user-friendly web applications. I have a strong interest in both frontend and backend development, focusing on delivering reliable, efficient, and maintainable software solutions.
-                                </p>
-                                <p className="mb-4">
-                                    I began my journey in software development by mastering the core fundamentals of <strong>HTML, CSS, and JavaScript</strong>, which helped me understand how web applications are structured, styled, and made interactive. These technologies enabled me to design responsive layouts and create visually appealing user interfaces.
-                                </p>
-                                <p className="mb-4">
-                                    As my skills advanced, I specialized in frontend development using <strong>React.js</strong>. Through React, I've gained extensive experience in component-based architecture, state management, reusable UI components, and performance optimization for large-scale applications.
-                                </p>
-                                <p className="mb-4">
-                                    To grow as a full-stack developer, I expanded my expertise into backend development using <strong>.NET and ASP.NET Core</strong>. I work on developing secure APIs, implementing business logic, and integrating robust backend services with modern frontend applications.
-                                </p>
-                                <p className="mb-4">
-                                    I also have hands-on experience with <strong>MySQL</strong>, enabling me to design databases, write optimized queries, and manage data efficiently across applications.
-                                </p>
-                                <p className="mb-0">
-                                    I continuously improve my skills through real-time project work and self-learning, adopting the latest industry best practices. I value clean code, scalability, and collaboration, and I aim to contribute impactful solutions to growing organizations.
-                                </p>
-                            </div>
+        <section id="about" className="about-section">
+            <div className="container px-4">
+                <div className="row align-items-center">
+                    
+                    {/* ── LEFT: INTERACTIVE ID BADGE ── */}
+                    <div className="col-lg-5 mb-5 mb-lg-0 d-flex justify-content-center">
+                        <div className="dev-badge-wrapper">
+                            <AnimatePresence mode="wait">
+                                {!isVerified ? (
+                                    <motion.div 
+                                        key="auth-mode"
+                                        initial={{ opacity: 1, scale: 1 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+                                        className="auth-portal"
+                                    >
+                                        <div className="auth-header">
+                                            <div className="status-indicator">
+                                                <div className={`status-dot ${isScanning ? 'active' : ''}`}></div>
+                                                <span>{isScanning ? 'SCANNING_ID...' : 'SYSTEM_LOCKED'}</span>
+                                            </div>
+                                            <div className="access-label">RESTRICTED</div>
+                                        </div>
+
+                                        <div className="auth-body">
+                                            <div 
+                                                className={`fingerprint-scanner ${isScanning ? 'scanning' : ''}`}
+                                                onMouseEnter={handleMouseEnter}
+                                                onMouseLeave={handleMouseLeave}
+                                                onMouseDown={handleMouseEnter}
+                                                onMouseUp={handleMouseLeave}
+                                            >
+                                                <div className="scanner-grid"></div>
+                                                <div className="scanner-rings">
+                                                    <span></span>
+                                                    <span></span>
+                                                    <span></span>
+                                                </div>
+                                                <i className="fa-solid fa-fingerprint"></i>
+                                                {isScanning && <div className="scanner-line"></div>}
+                                                <div className="scanner-glow"></div>
+                                            </div>
+                                            <div className="auth-instruction">
+                                                {isScanning ? (
+                                                    <span className="scanning-text">VERIFYING BIOMETRICS...</span>
+                                                ) : (
+                                                    <span>PLACE FINGERPRINT TO UNLOCK</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="auth-footer">
+                                            <div className="code-cipher">XP-772-NODE-01</div>
+                                            <div className="secure-icon"><i className="fa-solid fa-shield-halved"></i></div>
+                                        </div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div 
+                                        key="card-mode"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                                        className="dev-badge verified-mode"
+                                    >
+                                        <div className="badge-header">
+                                            <div className="badge-logo">
+                                                <i className="fa-solid fa-microchip"></i> IDENTITY_CORE
+                                            </div>
+                                            <div className="badge-tag verified">VERIFIED_ACCESS</div>
+                                        </div>
+
+                                        <div className="badge-identity">
+                                            <div className="badge-avatar">
+                                                <img 
+                                                    src="/images/IMG20260209113109.jpg.jpeg" 
+                                                    alt="Ubaise Ibrahim" 
+                                                    className="avatar-img" 
+                                                />
+                                            </div>
+                                            <div className="badge-info">
+                                                <h3 className="badge-name">Ubaise <br/>Ibrahim</h3>
+                                                <div className="badge-role">Full Stack Developer</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="badge-specs">
+                                            <div className="spec-item">
+                                                <div className="spec-label"><i className="fa-solid fa-layer-group me-1"></i> Stack</div>
+                                                <div className="spec-value">React / .NET</div>
+                                            </div>
+                                            <div className="spec-item">
+                                                <div className="spec-label"><i className="fa-solid fa-bolt me-1"></i> Level</div>
+                                                <div className="spec-value">Expert</div>
+                                            </div>
+                                            <div className="spec-item">
+                                                <div className="spec-label"><i className="fa-solid fa-fingerprint me-1"></i> Protocol</div>
+                                                <div className="spec-value">UI-8942</div>
+                                            </div>
+                                            <div className="spec-item">
+                                                <div className="spec-label"><i className="fa-solid fa-code-branch me-1"></i> Phase</div>
+                                                <div className="spec-value">Development</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="badge-footer">
+                                            <div className="barcode-container">
+                                                <div className="barcode"></div>
+                                                <div className="barcode-number">AUTHENTICATED-UI-8942</div>
+                                            </div>
+                                            <button className="reset-auth" onClick={() => setIsVerified(false)}>
+                                                <i className="fa-solid fa-lock"></i>
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
+
+                    {/* ── RIGHT: NARRATIVE ── */}
+                    <div className="col-lg-7 ps-lg-5">
+                        <motion.div
+                            initial={{ opacity: 1 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true }}
+                        >
+                            <div className="narrative-content">
+                                <span className="section-eyebrow">Professional Protocol</span>
+                                <h2 className="about-title-main">
+                                    Architecting <span className="about-text-glow">Digital</span> <br /> Logic.
+                                </h2>
+
+                                <div className="about-bio-modern">
+                                    <p>
+                                        I am <strong>Ubaise Ibrahim</strong>, a Software Developer singularly focused on forging robust, scalable, and beautifully designed web architectures. I specialize in the demanding space where highly performant backend systems satisfy flawless frontend interfaces.
+                                    </p>
+                                    <p>
+                                        My frontend philosophy is driven by <strong>React.js</strong>, manipulating its component-based DNA to build applications that don't just work, but feel instantly responsive to the user.
+                                    </p>
+                                    <p>
+                                        To power these experiences, my backend architecture is strictly enforced by <strong>.NET and ASP.NET Core</strong>. I thrive on architecting bulletproof APIs, weaving complex business logic, and deploying secure databases that refuse to buckle under pressure.
+                                    </p>
+                                    <p className="mb-0">
+                                        I am relentlessly refining my stack. Clean code, high scalability, and an obsession with detail are not just preferences—they are my protocol.
+                                    </p>
+                                </div>
+
+                                <div className="philosophy-grid">
+                                    <div className="philosophy-grid-item">
+                                        <div className="phi-icon"><i className="fa-solid fa-microchip"></i></div>
+                                        <div className="phi-text">
+                                            <h4>System Architecture</h4>
+                                            <p>Scalable Database Design & .NET APIs</p>
+                                        </div>
+                                    </div>
+                                    <div className="philosophy-grid-item">
+                                        <div className="phi-icon"><i className="fa-solid fa-code"></i></div>
+                                        <div className="phi-text">
+                                            <h4>Frontend Mastery</h4>
+                                            <p>Reactive, High-Performance React UI</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="about-cta-footer">
+                                    <a href="#projects" className="btn-premium">
+                                        <span>Initiate Protocol <i className="fa-solid fa-arrow-right ms-2"></i></span>
+                                    </a>
+                                    <div className="connection-status">
+                                        <div className="pulse-ring"></div>
+                                        <span>SYSTEM_ONLINE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+
                 </div>
             </div>
         </section>

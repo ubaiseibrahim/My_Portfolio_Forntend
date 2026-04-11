@@ -1,48 +1,252 @@
+/* ─────────────────────────── PROJECTS SECTION ─────────────────────────── */
 .projects-section {
-    background-color: var(--bg-color);
+    background: #ffffff;
+    padding: var(--section-padding);
+    position: relative;
+    overflow: hidden;
 }
 
-.project-card-custom {
-    background: var(--glass-bg);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 3rem;
-    height: 100%;
+.projects-section::before {
+    content: 'SHOWCASE';
+    position: absolute;
+    top: 5%;
+    right: -2%;
+    font-size: 10vw;
+    font-weight: 900;
+    color: rgba(10, 25, 47, 0.02);
+    z-index: 0;
+    pointer-events: none;
+    font-family: var(--font-heading);
+}
+
+/* ── Project Card Premium ── */
+.project-card-premium {
+    position: relative;
+    background: #f8fafc;
+    border-radius: 32px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     transition: var(--transition);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    height: 100%;
+    box-shadow: var(--shadow-sm);
 }
 
-@media (max-width: 768px) {
-    .project-card-custom {
-        padding: 2rem 1.5rem;
-    }
-}
-
-.project-card-custom:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+.project-card-premium:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(10, 25, 47, 0.08);
     border-color: var(--primary-color);
 }
 
-.project-card-custom h4 {
+/* ── BACKGROUND INDEX ── */
+.project-index-bg {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 8rem;
+    font-weight: 900;
+    color: rgba(10, 25, 47, 0.03);
     font-family: var(--font-heading);
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    font-weight: 800;
+    line-height: 1;
+    z-index: 1;
+    pointer-events: none;
 }
 
-.project-tag-custom {
-    display: inline-block;
-    padding: 6px 14px;
-    background: rgba(226, 194, 144, 0.1);
-    color: var(--primary-hover);
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 700;
+/* ── VISUAL SECTION (IMAGE FOCUS) ── */
+.project-visual {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10; /* Clean cinematic ratio */
+    overflow: hidden;
+    z-index: 2;
+    background: #e2e8f0;
+}
+
+.main-frame {
+    width: 100%;
+    height: 100%;
+}
+
+.main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Still cover, but the 16:10 ratio prevents extreme cropping */
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card-premium:hover .main-img {
+    transform: scale(1.05);
+}
+
+.frame-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(10, 25, 47, 0.1) 60%,
+        rgba(10, 25, 47, 0.6) 100%
+    );
+}
+
+/* ── FLOATING GALLERY (LIGHT TABLE) ── */
+.project-light-table {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.light-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.light-thumb:hover, .light-thumb.active {
+    opacity: 1;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.light-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ── CONTENT OVERLAY ── */
+.project-details-overlay {
+    padding: 30px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+    z-index: 5;
+    position: relative;
+}
+
+.project-category {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
     text-transform: uppercase;
-    margin-right: 10px;
+    letter-spacing: 3px;
+    color: var(--primary-hover);
     margin-bottom: 10px;
-    letter-spacing: 0.5px;
+    display: block;
+    font-weight: 700;
+}
+
+.project-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--secondary-color);
+    line-height: 1.2;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.project-summary {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 15px 0 25px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.details-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    padding-top: 20px;
+}
+
+.project-mini-tags {
+    display: flex;
+    gap: 8px;
+}
+
+.mini-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    padding: 4px 12px;
+    background: #f1f5f9;
+    border-radius: 20px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.project-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 22px;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: var(--transition-fast);
+}
+
+.project-action-btn:hover {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    transform: translateX(5px);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+    .project-visual { aspect-ratio: 16/11; }
+}
+
+@media (max-width: 768px) {
+    .project-visual { aspect-ratio: 16/12; }
+    .project-details-overlay { padding: 25px; }
+    .project-title { font-size: 1.4rem; }
+}
+
+/* Loading Spinner */
+.projects-loading {
+    padding: 100px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f1f5f9;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

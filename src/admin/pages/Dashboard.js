@@ -1,33 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { BASE_URL } from '../../utils/function';
 
 const Dashboard = () => {
-    const [stats, setStats] = useState({
-        projects: 0,
-        users: 0,
-        messages: 0
-    });
+    const [stats, setStats] = useState({ projects: 0, users: 0, messages: 0 });
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchStats();
-    }, []);
+    useEffect(() => { fetchStats(); }, []);
 
     const fetchStats = async () => {
         try {
-            // Simplified: Fetch counts from their respective endpoints
             const [projRes, userRes, msgRes] = await Promise.all([
                 fetch(`${BASE_URL}projects.php/get`),
                 fetch(`${BASE_URL}auth.php/get`),
                 fetch(`${BASE_URL}contact.php/get`)
             ]);
-
             const [projData, userData, msgData] = await Promise.all([
-                projRes.json(),
-                userRes.json(),
-                msgRes.json()
+                projRes.json(), userRes.json(), msgRes.json()
             ]);
-
             setStats({
                 projects: projData.length || 0,
                 users: userData.length || 0,
@@ -41,52 +31,94 @@ const Dashboard = () => {
     };
 
     const statCards = [
-        { title: 'Total Projects', count: stats.projects, icon: 'fa-project-diagram', color: '#e2c290' },
-        { title: 'Active Users', count: stats.users, icon: 'fa-users', color: '#4da6ff' },
-        { title: 'New Messages', count: stats.messages, icon: 'fa-envelope', color: '#ff4d4d' }
+        { title: 'Total Projects', count: stats.projects, icon: 'fa-layer-group',     color: '#e2c290', label: 'PORTFOLIO_ITEMS' },
+        { title: 'Active Users',   count: stats.users,    icon: 'fa-user-shield',     color: '#4da6ff', label: 'SYSTEM_USERS'   },
+        { title: 'New Messages',   count: stats.messages, icon: 'fa-satellite-dish',  color: '#a78bfa', label: 'BROADCASTS_IN'  }
     ];
 
+    const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
+
     return (
-        <div className="admin-page">
-            <div className="admin-header">
-                <h2>Dashboard Overview</h2>
+        <div className="admin-page dashboard-page">
+
+            {/* ── COMMAND HEADER ── */}
+            <div className="dashboard-command-header">
+                <div className="dashboard-greeting">
+                    <span className="dashboard-sys-tag">SYS // PORTFOLIO_OS v4.2</span>
+                    <h2 className="dashboard-title">Mission Control</h2>
+                    <p className="dashboard-subtitle">
+                        Welcome back, <strong>{user.username || 'Admin'}</strong>. All systems are operational.
+                    </p>
+                </div>
+                <div className="dashboard-status-chip">
+                    <span className="dash-status-dot"></span>
+                    <span>ALL SYSTEMS NOMINAL</span>
+                </div>
             </div>
 
+            {/* ── STATS GRID ── */}
             {loading ? (
-                <p>Loading stats...</p>
+                <div className="dashboard-loading">
+                    <i className="fa-solid fa-circle-notch fa-spin"></i>
+                    <span>FETCHING TELEMETRY...</span>
+                </div>
             ) : (
                 <div className="row g-4 mb-5">
                     {statCards.map((card, index) => (
                         <div key={index} className="col-md-4">
-                            <div className="admin-card stats-card p-4 h-100">
-                                <div className="d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <p className="text-secondary mb-1 fw-bold text-uppercase small">{card.title}</p>
-                                        <h3 className="mb-0 h2" style={{ color: 'var(--secondary-color)' }}>{card.count}</h3>
-                                    </div>
-                                    <div className="stats-icon" style={{ background: `${card.color}15`, color: card.color }}>
+                            <div className="dash-stat-card">
+                                <div className="dash-stat-top">
+                                    <div
+                                        className="dash-stat-icon"
+                                        style={{
+                                            background: `${card.color}20`,
+                                            color: card.color,
+                                            boxShadow: `0 0 20px ${card.color}30`
+                                        }}
+                                    >
                                         <i className={`fa-solid ${card.icon}`}></i>
                                     </div>
+                                    <span className="dash-stat-label" style={{ color: card.color }}>
+                                        {card.label}
+                                    </span>
                                 </div>
+                                <div className="dash-stat-count">{card.count}</div>
+                                <div className="dash-stat-title">{card.title}</div>
+                                <div
+                                    className="dash-stat-bar"
+                                    style={{ background: `linear-gradient(90deg, ${card.color}80, transparent)` }}
+                                ></div>
                             </div>
                         </div>
                     ))}
                 </div>
             )}
 
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="admin-card p-5 text-center">
-                        <h4 className="mb-3">Welcome to your Admin Portal</h4>
-                        <p className="text-secondary mx-auto" style={{ maxWidth: '600px' }}>
-                            From here you can manage your portfolio projects, user accounts, and view messages sent from the contact form.
-                            Use the sidebar navigation to get started.
-                        </p>
-                    </div>
+            {/* ── WELCOME PANEL ── */}
+            <div className="dash-welcome-panel">
+                <div className="dash-welcome-orb">
+                    <i className="fa-solid fa-shield-halved"></i>
+                </div>
+                <div className="dash-welcome-text">
+                    <h4>Admin Command Center</h4>
+                    <p>
+                        Manage your portfolio projects, user accounts, and incoming transmissions from
+                        the contact station. Use the sidebar navigation to access each module.
+                    </p>
+                </div>
+                <div className="dash-welcome-links">
+                    <Link to="/admin/projects" className="dash-quick-link">
+                        <i className="fa-solid fa-layer-group"></i> Projects
+                    </Link>
+                    <Link to="/admin/messages" className="dash-quick-link">
+                        <i className="fa-solid fa-envelope"></i> Messages
+                    </Link>
                 </div>
             </div>
+
         </div>
     );
 };
+
 
 export default Dashboard;
