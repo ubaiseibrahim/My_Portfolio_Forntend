@@ -100,7 +100,7 @@ const About = () => {
                                         <div className="badge-identity">
                                             <div className="badge-avatar">
                                                 <img 
-                                                    src="/images/IMG20260209113109.jpg.jpeg" 
+                                                    src="/images/file_000000006c1c820b9123015a227d07ca.png" 
                                                     alt="Ubaise Ibrahim" 
                                                     className="avatar-img" 
                                                 />

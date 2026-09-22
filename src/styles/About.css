@@ -432,10 +432,6 @@
     height: 100%;
     object-fit: cover;
     border-radius: 22px;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    backface-visibility: hidden;
-    transform: translateZ(0);
 }
 
 .badge-name {
