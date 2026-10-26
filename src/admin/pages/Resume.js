@@ -55,7 +55,10 @@ const Resume = () => {
                 body: formData
             });
 
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Upload failed');
+            }
 
             await response.json();
             // Refresh the resume to ensure we get the correct path/url from server logic
@@ -68,7 +71,7 @@ const Resume = () => {
             if (fileInput) fileInput.value = '';
 
         } catch (err) {
-            setUploadStatus({ type: 'error', message: 'Failed to upload resume. Please try again.' });
+            setUploadStatus({ type: 'error', message: err.message || 'Failed to upload resume. Please try again.' });
             console.error(err);
         } finally {
             setSubmitting(false);

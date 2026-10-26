@@ -152,7 +152,7 @@ const Users = () => {
                                 <tr key={user.id}>
                                     <td style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         {user.profile_picture ? (
-                                            <img src={`${BASE_URL}${user.profile_picture}`} alt="" className="admin-user-avatar" />
+                                            <img src={user.profile_picture.startsWith('http') ? user.profile_picture : `${BASE_URL}${user.profile_picture}`} alt="" className="admin-user-avatar" />
                                         ) : (
                                             <div className="admin-user-avatar" style={{ background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
                                                 {user.full_name.charAt(0)}

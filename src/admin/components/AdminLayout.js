@@ -1,18 +1,45 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import AdminNavbar from './AdminNavbar';
+import { BASE_URL } from '../../utils/function';
 import '../styles/Admin.css';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('admin_user'));
+    const [user, setUser] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('admin_user'));
+        } catch (e) {
+            return null;
+        }
+    });
 
     useEffect(() => {
         if (!user) {
             navigate('/admin_login');
+            return;
         }
-    }, [user, navigate]);
+
+        // Automatically sync fresh user profile and avatar from backend
+        const syncUser = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}auth.php/get`);
+                if (response.ok) {
+                    const users = await response.json();
+                    const freshUser = users.find(u => u.username === user.username || u.id === user.id);
+                    if (freshUser) {
+                        localStorage.setItem('admin_user', JSON.stringify(freshUser));
+                        setUser(freshUser);
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not sync user profile:', err);
+            }
+        };
+
+        syncUser();
+    }, [navigate]);
 
     const handleLogout = () => {
         localStorage.removeItem('admin_user');

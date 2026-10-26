@@ -151,7 +151,7 @@ const Projects = () => {
 
         // Populate Featured Image
         if (project.featured_image) {
-            setFeaturedPreview(`${BASE_URL}${project.featured_image}`);
+            setFeaturedPreview(project.featured_image.startsWith('http') ? project.featured_image : `${BASE_URL}${project.featured_image}`);
             setRetainFeatured(true);
             setFeaturedImage(null);
         } else {
@@ -217,7 +217,7 @@ const Projects = () => {
                     {projects.map(project => (
                         <div key={project.id} className="admin-card">
                             {project.featured_image && (
-                                <img src={`${BASE_URL}${project.featured_image}`} alt={project.project_name} className="card-img" />
+                                <img src={project.featured_image.startsWith('http') ? project.featured_image : `${BASE_URL}${project.featured_image}`} alt={project.project_name} className="card-img" />
                             )}
                             <div className="card-content">
                                 <h3>{project.project_name}</h3>
