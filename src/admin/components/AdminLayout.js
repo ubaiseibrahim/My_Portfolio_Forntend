@@ -15,8 +15,11 @@ const AdminLayout = () => {
         }
     });
 
+    const userId = user?.id;
+    const username = user?.username;
+
     useEffect(() => {
-        if (!user) {
+        if (!userId && !username) {
             navigate('/admin_login');
             return;
         }
@@ -27,7 +30,7 @@ const AdminLayout = () => {
                 const response = await fetch(`${BASE_URL}auth.php/get`);
                 if (response.ok) {
                     const users = await response.json();
-                    const freshUser = users.find(u => u.username === user.username || u.id === user.id);
+                    const freshUser = users.find(u => u.username === username || u.id === userId);
                     if (freshUser) {
                         localStorage.setItem('admin_user', JSON.stringify(freshUser));
                         setUser(freshUser);
@@ -39,7 +42,7 @@ const AdminLayout = () => {
         };
 
         syncUser();
-    }, [navigate]);
+    }, [navigate, userId, username]);
 
     const handleLogout = () => {
         localStorage.removeItem('admin_user');
