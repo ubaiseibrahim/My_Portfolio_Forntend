@@ -1,4 +1,4 @@
-﻿// Node.js + MongoDB Backend (Local):
+// Node.js + MongoDB Backend (Local):
 // export const BASE_URL = "http://localhost:5001/";
 
 export const BASE_URL = "https://my-portfolio-backend-tau.vercel.app/";
